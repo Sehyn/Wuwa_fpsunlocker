@@ -20,7 +20,6 @@ namespace Wuwa_fpsunlocker
                                                 | |                                                  
                                                 |_|                                                  
 ");
-            Console.WriteLine("GAME PATH HAS TO BE:C:\\Wuthering Waves\\Wuthering Waves Game | I will push an update later so it's dynamic!\n\n");
             Console.WriteLine("Steps:");
             Console.WriteLine("1) Make sure to SET the FPS limit to 60FPS BEFORE");
             Console.WriteLine("2) Then CLOSE the game");
@@ -31,7 +30,9 @@ namespace Wuwa_fpsunlocker
             Console.WriteLine("Discord: impots");
             Console.WriteLine("Press any key to unlock your FPS.");
             Console.ReadKey();
-            string dbPath = @"C:\Wuthering Waves\Wuthering Waves Game\Client\Saved\LocalStorage\LocalStorage.db";
+
+            Console.WriteLine("\nEnter the FULL path to the SQLite database file (e.g., C:\\Wuthering Waves\\Wuthering Waves Game\\Client\\Saved\\LocalStorage\\LocalStorage.db):");
+            string dbPath = Console.ReadLine();
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -39,7 +40,7 @@ namespace Wuwa_fpsunlocker
                 try
                 {
                     connection.Open();
-                    Console.WriteLine("Editing the file...");
+                    Console.WriteLine("Connected to the SQLite database.");
 
                     // Step 1: Read the GameQualitySetting JSON
                     string selectQuery = "SELECT value FROM LocalStorage WHERE key = 'GameQualitySetting';";
@@ -66,7 +67,7 @@ namespace Wuwa_fpsunlocker
 
                     // Step 2: Modify the KeyCustomFrameRate value in the JSON
                     var gameQualitySetting = JObject.Parse(gameQualitySettingJson);
-                    gameQualitySetting["KeyCustomFrameRate"] = 240;
+                    gameQualitySetting["KeyCustomFrameRate"] = 120;
                     string updatedGameQualitySettingJson = gameQualitySetting.ToString();
 
                     Console.WriteLine("\nUpdated GameQualitySetting JSON:");
@@ -74,12 +75,12 @@ namespace Wuwa_fpsunlocker
 
                     // Step 3: Update the modified JSON back into the database
                     string updateQuery = "UPDATE LocalStorage SET value = @value WHERE key = 'GameQualitySetting';";
+
                     using (SQLiteCommand updateCommand = new SQLiteCommand(updateQuery, connection))
                     {
                         updateCommand.Parameters.AddWithValue("@value", updatedGameQualitySettingJson);
                         int rowsAffected = updateCommand.ExecuteNonQuery();
-                        Console.WriteLine($"\n{rowsAffected} row(s) updated.");
-
+                        Console.WriteLine($"\n{rowsAffected} row(s) updated.\nGame should be patched!");
                     }
                 }
                 catch (Exception ex)
@@ -87,9 +88,8 @@ namespace Wuwa_fpsunlocker
                     Console.WriteLine("An error occurred: " + ex.Message);
                 }
             }
-            Console.Clear();
 
-            Console.WriteLine("\nGame succesfully Patched\nPress any key to exit...");
+            Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
         }
     }
