@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Data.SQLite;
 using System.IO;
 
 namespace Wuwa_fpsunlocker
@@ -18,124 +20,77 @@ namespace Wuwa_fpsunlocker
                                                 | |                                                  
                                                 |_|                                                  
 ");
-
+            Console.WriteLine("GAME PATH HAS TO BE:C:\\Wuthering Waves\\Wuthering Waves Game | I will push an update later so it's dynamic!\n\n");
             Console.WriteLine("Steps:");
-            Console.WriteLine("1) Make sure to have the game running");
-            Console.WriteLine("2) Once unlocker finished restart game + launcher");
-            Console.WriteLine("3) Make sure within games settings to DISABLE vsync");
+            Console.WriteLine("1) Make sure to SET the FPS limit to 60FPS BEFORE");
+            Console.WriteLine("2) Then CLOSE the game");
+            Console.WriteLine("3) Make sure within games settings to DISABLE vsync and to NOT touch the FPS Limit AFTER patch");
             Console.WriteLine("4) Profit\n");
             Console.WriteLine("NOTE:");
-            Console.WriteLine("Game looks poorly optimized and bugged.\nTry windowered mode if unlocker not working aswell of lower resolution\nFPS counter EG Nvidia will still show 60 FPS but you will noticed the +120fps smooth.\n");
+            Console.WriteLine("Game looks poorly optimized and bugged.");
             Console.WriteLine("Discord: impots");
             Console.WriteLine("Press any key to unlock your FPS.");
             Console.ReadKey();
-            // Define the filename and the keyword we are looking for
-            string fileName = "GameUserSettings.ini";
-            string requiredPathKeyword = "Wuthering Waves";
-            bool fileFound = false;
+            string dbPath = @"C:\Wuthering Waves\Wuthering Waves Game\Client\Saved\LocalStorage\LocalStorage.db";
+            string connectionString = $"Data Source={dbPath};Version=3;";
 
-            // Start the search from the root of each drive
-            foreach (var drive in DriveInfo.GetDrives())
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
-                if (drive.IsReady)
+                try
                 {
-                    string foundFile = FindFile(drive.RootDirectory.FullName, fileName, requiredPathKeyword);
-                    if (foundFile != null)
+                    connection.Open();
+                    Console.WriteLine("Editing the file...");
+
+                    // Step 1: Read the GameQualitySetting JSON
+                    string selectQuery = "SELECT value FROM LocalStorage WHERE key = 'GameQualitySetting';";
+                    string gameQualitySettingJson = null;
+
+                    using (SQLiteCommand selectCommand = new SQLiteCommand(selectQuery, connection))
                     {
-                        Console.WriteLine($"File found: {foundFile}");
-                        ProcessFile(foundFile);
-                        fileFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!fileFound)
-            {
-                Console.WriteLine("File not found on any drive.");
-            }
-
-            // Pause the console to view output
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-        }
-
-        static string FindFile(string rootDirectory, string fileName, string requiredPathKeyword)
-        {
-            try
-            {
-                // Get all subdirectories
-                foreach (string dir in Directory.GetDirectories(rootDirectory))
-                {
-                    Console.WriteLine($"Checking directory: {dir}");
-                    if (dir.Contains(requiredPathKeyword))
-                    {
-                        Console.WriteLine($"Directory matches keyword: {dir}");
-                        try
+                        using (SQLiteDataReader reader = selectCommand.ExecuteReader())
                         {
-                            // Check files in the current directory
-                            foreach (string file in Directory.GetFiles(dir, fileName))
+                            if (reader.Read())
                             {
-                                return file;
-                            }
-
-                            // Recursive call for subdirectories
-                            string foundFile = FindFile(dir, fileName, requiredPathKeyword);
-                            if (foundFile != null)
-                            {
-                                return foundFile;
+                                gameQualitySettingJson = reader["value"].ToString();
+                                Console.WriteLine("Original GameQualitySetting JSON:");
+                                Console.WriteLine(gameQualitySettingJson);
                             }
                         }
-                        catch (UnauthorizedAccessException)
-                        {
-                            Console.WriteLine($"Unauthorized access to directory: {dir}");
-                            // Ignore directories we don't have access to
-                        }
-                        catch (DirectoryNotFoundException)
-                        {
-                            Console.WriteLine($"Directory not found: {dir}");
-                            // Ignore directories that were removed during the search
-                        }
+                    }
+
+                    if (gameQualitySettingJson == null)
+                    {
+                        Console.WriteLine("No GameQualitySetting found.");
+                        return;
+                    }
+
+                    // Step 2: Modify the KeyCustomFrameRate value in the JSON
+                    var gameQualitySetting = JObject.Parse(gameQualitySettingJson);
+                    gameQualitySetting["KeyCustomFrameRate"] = 240;
+                    string updatedGameQualitySettingJson = gameQualitySetting.ToString();
+
+                    Console.WriteLine("\nUpdated GameQualitySetting JSON:");
+                    Console.WriteLine(updatedGameQualitySettingJson);
+
+                    // Step 3: Update the modified JSON back into the database
+                    string updateQuery = "UPDATE LocalStorage SET value = @value WHERE key = 'GameQualitySetting';";
+                    using (SQLiteCommand updateCommand = new SQLiteCommand(updateQuery, connection))
+                    {
+                        updateCommand.Parameters.AddWithValue("@value", updatedGameQualitySettingJson);
+                        int rowsAffected = updateCommand.ExecuteNonQuery();
+                        Console.WriteLine($"\n{rowsAffected} row(s) updated.");
+
                     }
                 }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.WriteLine($"Unauthorized access to directory: {rootDirectory}");
-                // Ignore directories we don't have access to
-            }
-            catch (DirectoryNotFoundException)
-            {
-                Console.WriteLine($"Directory not found: {rootDirectory}");
-                // Ignore directories that were removed during the search
-            }
-            return null;
-        }
-
-        static void ProcessFile(string filePath)
-        {
-            string[] lines = File.ReadAllLines(filePath);
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (lines[i].StartsWith("FrameRateLimit="))
+                catch (Exception ex)
                 {
-                    lines[i] = "FrameRateLimit=0";
-                    break;
+                    Console.WriteLine("An error occurred: " + ex.Message);
                 }
             }
-
-            File.WriteAllLines(filePath, lines);
-
-            FileInfo fileInfo = new FileInfo(filePath);
-            fileInfo.IsReadOnly = true;
-
-            Console.WriteLine($"Updated and set file to read-only: {filePath}");
             Console.Clear();
-            Console.WriteLine($"Updated and set file to read-only: {filePath}");
-            Console.WriteLine($"Enjoy and have fun.");
 
-
-
+            Console.WriteLine("\nGame succesfully Patched\nPress any key to exit...");
+            Console.ReadKey();
         }
     }
 }
