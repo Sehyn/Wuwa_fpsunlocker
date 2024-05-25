@@ -1,50 +1,50 @@
-# Wuthering Waves FPS Unlocker
+# Wuthering Waves Editor
 
-Welcome to the Wuthering Waves FPS Unlocker! This program is designed to find and modify the `LocalStorage.db` file for the game **Wuthering Waves**, allowing you to unlock the frame rate for a smoother gaming experience.
-
+Welcome to the Wuthering Waves Editor! This program is designed to read and modify the `LocalStorage.db` file for the game Wuthering Waves, allowing you to customize various settings for a better gaming experience.
 
 ## Features
 
-- **Database Connection**: Connects to a specified SQLite database file.
-- **JSON Reading**: Reads JSON data from a specific record in the database.
-- **JSON Modification**: Updates a specific key-value pair within the JSON.
-- **Database Update**: Saves the modified JSON back into the database.
-- **User Prompt**: Waits for user input before closing the console to ensure you can review the output.
+- **Read and Display JSON Data**: The program reads JSON data from the `LocalStorage.db` file and displays it in a user-friendly interface.
+- **Edit JSON Values**: Modify any value within the JSON data directly through the interface.
+- **Save Changes**: Save the modified JSON data back to the `LocalStorage.db` file.
 
 ## How It Works
 
 ### Initialization
 
-The program starts by defining the path to the SQLite database file and setting up the connection string.
+The program starts by displaying a message box with instructions on how to use it. Then, it provides an interface for you to specify the path to the `LocalStorage.db` file.
 
-### Database Connection
+### Load JSON Data
 
-It opens a connection to the SQLite database using `SQLiteConnection`.
+1. **Database Connection**: Connects to the SQLite database at the specified path.
+2. **Retrieve Data**: Executes a SQL query to retrieve the `GameQualitySetting` JSON data from the `LocalStorage` table.
+3. **Display Data**: Parses the JSON data and displays it in a tree view for easy navigation and editing.
 
-### JSON Reading
+### Edit JSON Data
 
-1. **Query Execution**: Executes a `SELECT` query to fetch the JSON value associated with the `GameQualitySetting` key from the `LocalStorage` table.
-2. **Data Retrieval**: Reads the JSON data from the result set.
+1. **Select Node**: Select a node in the tree view to view and edit its value.
+2. **Modify Value**: Enter a new value in the provided text box and save the change.
 
-### JSON Modification
+### Save Changes
 
-1. **Parsing JSON**: Uses `Newtonsoft.Json` to parse the JSON string into a `JObject`.
-2. **Updating Value**: Modifies the `KeyCustomFrameRate` value from `60` to `120` within the JSON object.
-3. **Serializing JSON**: Converts the modified `JObject` back into a JSON string.
-
-### Database Update
-
-1. **Update Query**: Executes an `UPDATE` query to save the modified JSON back into the `LocalStorage` table.
-2. **Confirmation**: Outputs the number of rows affected by the update to confirm the change.
-
+1. **Update Database**: Updates the modified JSON data back into the SQLite database.
+2. **Confirmation**: Displays a message indicating the number of rows updated.
 
 ## Usage
 
-To use the Wuthering Waves FPS Unlocker:
+### Prerequisites
 
-1. **Download and Compile**: Clone the repository and compile the source code using a C# compiler or an IDE like Visual Studio.
-2. **Run the Program**: Execute the compiled program. The console will display the progress and status messages.
-3. **Review Output**: The program will print the original and updated JSON, the number of rows updated, and will wait for you to press a key before closing.
+- Ensure the game is not running before making any modifications.
+- Verify the `LocalStorage.db` path matches your game installation directory (default path is provided).
+
+### Steps
+
+1. **Close the Game**: Ensure Wuthering Waves is not running.
+2. **Specify Path**: Make sure the `LocalStorage.db` path matches your game installation. The default installation path is `C:\\Wuthering Waves\\Wuthering Waves Game\\Client\\Saved\\LocalStorage\\LocalStorage.db`.
+3. **Avoid Conflicts**: Ensure the `LocalStorage.db` file is not in use by any other process.
+4. **Modify Values**: Use the editor to modify the desired JSON values.
+5. **Save Changes**: Save the modifications and restart the game.
+6. **Support**: If you appreciated this tool, please star the project on GitHub and leave suggestions in the issues section.
 
 ## Contributing
 
@@ -52,13 +52,10 @@ Contributions are welcome! Feel free to submit a pull request or open an issue t
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
 ## Acknowledgements
 
 Special thanks to the Wuthering Waves community for their support and feedback.
 
----
-
-Enjoy your unlocked FPS in Wuthering Waves!
-
+Enjoy customizing your Wuthering Waves experience with the Wuthering Waves Editor!
