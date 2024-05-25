@@ -19,6 +19,20 @@ namespace Wuwa_fpsunlocker
         public MainForm()
         {
             InitializeComponent();
+            ShowTutorial();
+
+        }
+
+        private void ShowTutorial()
+        {
+            string tutorial = "1) Close the game make sure it's not running\n\n" +
+                              "2) Make sure that the LocalStorage path matches with your game installation the one set by default is a placeholder (default installation!) C:\\Wuthering Waves\\Wuthering Waves Game\\Client\\Saved\\LocalStorage\\LocalStorage.db\n\n" +
+                              "3) Make sure the file is not used by any other process or you will not be able to open and modify it\n\n" +
+                              "4) Make your modifications, save, and you can start the game!\n\n" +
+                              "5) If you appreciated my tool, please star on GitHub it's much appreciated and leave ideas in the issues section!\n\n" +
+                              "6) Open Source FTW!\n\n" +
+                              "- Credits : Sehyn";
+            MessageBox.Show(tutorial, "How to Use the Program", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnLoadJson_Click(object sender, EventArgs e)
